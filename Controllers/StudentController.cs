@@ -94,7 +94,7 @@ namespace studentmanagement.Controllers
         [HttpPost("api/students")]
         public IActionResult Post(Students s)                      /*api to create student dtails*/
         {
-            bool flag = false;
+            
             var qry = _students.OrderBy(x => x.Id).LastOrDefault();  /*assigning last student id to qry*/
 
             int id = qry == null ? 1 : qry.Id + 1;                   /*if id is null assign 1 else increment it by one and assign to id*/
