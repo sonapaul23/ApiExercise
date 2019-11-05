@@ -11,21 +11,21 @@ namespace studentmanagement.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        private static List<Courses> _courses = new List<Courses>();
-        private static List<Students> _students = new List<Students>();
+        private static List<Courses> _courses = new List<Courses>();       /*create a list with courses class attributes*/
+        private static List<Students> _students = new List<Students>();    /*create a list with Students class attributes*/
 
 
         // GET: api/courses
-        [HttpGet("api/courses")]
+        [HttpGet("api/courses")]                                          /*view the list _courses */
         public IActionResult Getc()
         {
-            return Ok(_courses/*.Select(x => x.CourseName)*/);
+            return Ok(_courses);
         }
 
 
 
 
-        // GET: api/courses
+        // GET: api/courses                                               /*view the list _students*/
         [HttpGet("api/students")]
         public IActionResult Gets()
         {
@@ -34,7 +34,7 @@ namespace studentmanagement.Controllers
 
 
 
-        // GET: api/courses
+        // GET: api/courses                                              /*to view the name of students*/
         [HttpGet("api/students/namelist")]
         public IActionResult Getstudentname()
         {
@@ -43,25 +43,26 @@ namespace studentmanagement.Controllers
 
 
 
-        // GET: api/courses/Name
+        // GET: api/courses/Name                                        /*view course details by specific coursename*/
         [HttpGet("api/courses/{Name}")]
         public IActionResult Get(string Name)
         {
-            var course = _courses.Where(x => x.CourseName == Name);
-            if (course == null)
+            var course = _courses.Where(x => x.CourseName == Name);     /*check whether the course is in list*/
+            if (course == null)                                         /*if course is not present return notfound*/
                 return NotFound();
 
-            return Ok(course);
+            return Ok(course);                                          /*else return corresponding course details*/
         }
 
 
 
         // GET: api/coursesandcount
-        [HttpGet("api/courses/count")]
+        [HttpGet("api/courses/count")]                                  /*api to get the courses and count of students enrolled in the course*/        
         public IActionResult GetCount()
         {
 
-            var coursedetail =_courses.GroupJoin(_students, x => x.CourseName, y => y.CourseName, (x, y) => new { courseName = x.CourseName, students = y.Count() });
+            var coursedetail =_courses.GroupJoin(_students, x => x.CourseName, y => y.CourseName, (x, y) => new { courseName = x.CourseName, students = y.Count() });       /*join the coursename entity in _students list and _courses list and group by coursename and assign coursename and count to coursedetail*/
+
             return Ok(coursedetail);
 
         
@@ -74,15 +75,15 @@ namespace studentmanagement.Controllers
 
         // POST: api/courses
         [HttpPost("api/courses")]
-        public IActionResult Post(Courses c)
+        public IActionResult Post(Courses c)                     /*api to create new courses*/
         {
-            var CourseToBeAdded = new Courses
+            var CourseToBeAdded = new Courses                    /*create an object to add details*/
             {
                 CourseName = c.CourseName,
                 DurationInMonths = c.DurationInMonths,
                 CourseHead = c.CourseHead,
             };
-            _courses.Add(CourseToBeAdded);
+            _courses.Add(CourseToBeAdded);                       /*add details to the _courses list*/
             return Ok();
         }
 
@@ -91,25 +92,14 @@ namespace studentmanagement.Controllers
 
         // POST: api/student
         [HttpPost("api/students")]
-        public IActionResult Post(Students s)
+        public IActionResult Post(Students s)                      /*api to create student dtails*/
         {
             bool flag = false;
-            var qry = _students.OrderBy(x => x.Id).LastOrDefault();
+            var qry = _students.OrderBy(x => x.Id).LastOrDefault();  /*assigning last student id to qry*/
 
-            int id = qry == null ? 1 : qry.Id + 1;
-            foreach (var course in _courses)
-            {
-                if (s.CourseName == course.CourseName)
-                {
-                    flag = true;
-                }
+            int id = qry == null ? 1 : qry.Id + 1;                   /*if id is null assign 1 else increment it by one and assign to id*/
 
-            }
-            if (flag == false)
-            {
-                return Conflict("Course is not in the list");
-            }
-            if (Convert.ToDateTime(s.DateOfBirth) > DateTime.Now)
+            if (Convert.ToDateTime(s.DateOfBirth) > DateTime.Now)    /*check whether the date is future date and return conflict*/
             {
                 return Conflict("enter a valid DateOfBirth");
             }
@@ -118,7 +108,7 @@ namespace studentmanagement.Controllers
                 return Conflict("enter a valid EnrolmentDate");
             }
 
-            var studentToBeAdded = new Students
+            var studentToBeAdded = new Students                       /*add student details to list _students*/
             {
                 Id = id,
                 FirstName = s.FirstName,
@@ -139,7 +129,7 @@ namespace studentmanagement.Controllers
 
         // PUT: api/students/id
         [HttpPut("api/students/{id}")]
-        public IActionResult Put(int id, Students s)
+        public IActionResult Put(int id, Students s)                     /*edit the student details by passing id*/
         {
             var edit = _students.SingleOrDefault(x => x.Id == id);
             if (edit == null)
@@ -163,7 +153,7 @@ namespace studentmanagement.Controllers
 
         // PUT: api/courses/Name
         [HttpPut("api/courses/{Name}")]
-        public IActionResult Put(string Name, Courses s)
+        public IActionResult Put(string Name, Courses s)                      /*edit the course details by passing course name*/
         {
             var edit = _courses.SingleOrDefault(x => x.CourseName == Name);
             if (edit == null)
@@ -181,7 +171,7 @@ namespace studentmanagement.Controllers
 
 
         // DELETE: api/courses/Name
-        [HttpDelete("api/courses/{Name}")]
+        [HttpDelete("api/courses/{Name}")]                                        /*delete course details by name*/
         public IActionResult Delete(string Name)
         {
             var delete = _courses.Where(x => x.CourseName == Name);
