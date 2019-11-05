@@ -60,9 +60,12 @@ namespace studentmanagement.Controllers
         [HttpGet("api/courses/count")]
         public IActionResult GetCount()
         {
-            var coursedetail = _courses.Join(_students, x=>x.CourseName, y => y.CourseName, (x, y) => new { fname = y.FirstName, lname = y.LastName, x.CourseName });
-            var coursecount = coursedetail.GroupBy(x => x.CourseName).Select(x => new { coursename = x.Key, count = x.Count() });
-            return Ok(coursecount);
+
+            var coursedetail =_courses.GroupJoin(_students, x => x.CourseName, y => y.CourseName, (x, y) => new { courseName = x.CourseName, students = y.Count() });
+            return Ok(coursedetail);
+
+        
+
 
 
 
@@ -90,9 +93,31 @@ namespace studentmanagement.Controllers
         [HttpPost("api/students")]
         public IActionResult Post(Students s)
         {
+            bool flag = false;
             var qry = _students.OrderBy(x => x.Id).LastOrDefault();
 
             int id = qry == null ? 1 : qry.Id + 1;
+            foreach (var course in _courses)
+            {
+                if (s.CourseName == course.CourseName)
+                {
+                    flag = true;
+                }
+
+            }
+            if (flag == false)
+            {
+                return Conflict("Course is not in the list");
+            }
+            if (Convert.ToDateTime(s.DateOfBirth) > DateTime.Now)
+            {
+                return Conflict("enter a valid DateOfBirth");
+            }
+            if (Convert.ToDateTime(s.EnrolmentDate) > DateTime.Now)
+            {
+                return Conflict("enter a valid EnrolmentDate");
+            }
+
             var studentToBeAdded = new Students
             {
                 Id = id,
